@@ -32,32 +32,6 @@ import Link from "next/link";
  * 
  */
 
-  const data = {
-    filters: {
-      age: "18-60 anni",
-      gender: "M and F",
-      job: "Operaio",
-      location: "Unknown",
-      topic: "Healthcare",
-    },
-    summaries: [
-      {
-        title: "Accesso ai servizi sanitari",
-        description:
-          "Il 65% dei cittadini tra 18 e 60 anni ha segnalato difficoltà nell'accesso ai servizi sanitari locali.",
-      },
-      {
-        title: "Richiesta di nuove cliniche",
-        description:
-          "Il 75% dei partecipanti ha richiesto l'apertura di cliniche locali per ridurre i tempi di attesa.",
-      },
-      {
-        title: "Digitalizzazione delle prenotazioni",
-        description:
-          "Il 58% dei rispondenti suggerisce la digitalizzazione dei sistemi di prenotazione per maggiore efficienza.",
-      },
-    ],
-  };
 
 const dataStatsList = [
   {
@@ -98,29 +72,65 @@ const dataStatsList = [
 
 
 const Home: React.FC = () => {
-  const [message, setMessage] = useState([]);
-  const handlingSendMessage = (message: any) => {
-    console.log('MSG:TO:SEND',message)
+  const [message, setMessage] = useState({});
+  const [response, setResponse] = useState();
+  
+  const fetchLambda = async (message:any) => {
+    try {
+      const LAMBDA_ENDPOINT = "https://4yyb2h8ufb.execute-api.eu-west-3.amazonaws.com/digital_twin";
+  
+      const res = await fetch(LAMBDA_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(message),
+      });
+  
+      if (!res.ok) {
+        console.error(`HTTP Error: ${res.status} - ${res.statusText}`);
+        console.error('Response Text:', await res.text());
+        return;
+      }
+  
+      const data = await res.json();
+      console.log('Lambda Response:', data?.response[0]);
+      
+      // Update the correct state variable
+      setResponse(data?.response[0] ?? "Purtroppo non sono riuscito ad avere informazioni disponibili per questa tua");
+      return data;
+    } catch (error) {
+      console.error('Error occurred while fetching Lambda:', error);
+    }
+  };
+  
+  const handlingSendMessage = async (messages: any) => {
+    console.log('MSG:TO:SEND',messages)
+    const lastContent = messages[messages.length - 1]?.content;
+    if(lastContent){
+      const data = await fetchLambda({ question: lastContent })
+      setMessage(data);
+    } else {
+      console.log('Messages empty..')
+    }
   }
+  
   return (
     <div className="grid grid-cols-12 gap-4 h-full mt-5">
-    <div className="col-span-12 md:col-span-5">
-      <Chat conversation={ (message) => handlingSendMessage(message)}/>
-    </div>
-    <div className="col-span-12 md:col-span-7">
+      <div className="col-span-12 md:col-span-5">
+        <Chat responseMessage={response} conversation={ (message) => handlingSendMessage(message)}/>
+      </div>
+          <div className="col-span-12 md:col-span-7">
     <div className="overflow-y-auto p-4 h-full space-y-5" 
       style={{ maxHeight: '900px' }}
       >
-      <HeaderUserPersona dataStatsList={dataStatsList}/>
-      <HeaderUserPersona12 data={data} />
-      <div className="mt-4 grid grid-cols-12 gap-4 md:mt-6 md:gap-6 2xl:mt-9 2xl:gap-7.5">
-
+      <HeaderUserPersona dataStatsList={message && Object.keys(message).length > 0 ? dataStatsList : null} />
+      <HeaderUserPersona12 data={message} />
       </div>
       </div>
     </div>
-    </div>
-
   );
 };
 
 export default Home;
+
