@@ -2,36 +2,30 @@ import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import ReactMarkdown from 'react-markdown';
 
+
+
 interface ChatProps {
   conversation: (messages: { role: string; content: string }[]) => void;
-  responseMessage: string;
 }
 
-const Chat: React.FC<ChatProps> = ({ conversation, responseMessage }) => {
-  const [messageStatus, setMessageStatus] = useState('');
+const Chat: React.FC<ChatProps> = ({ conversation }) => {
+  const [messageStatus, setMessageStatus] = useState({message:null, status:null});
   const [messages, setMessages] = useState([
-    { role: 'assistant', content: 'Ciao! Come posso aiutarti oggi?' },
+    { role: 'assistant', content: 'Hello! Come posso aiutarti oggi?' },
+    { role: 'user', content: 'Ciao, quanti ragazzi tra i 18 e 25 anni vogliono piu campi da tennis a Ravenna?' },
+    { role: 'assistant', content: 'Secondo un sondaggio immaginario, circa il 72% dei ragazzi tra i 18 e i 35 anni a Ravenna ha espresso interesse per la creazione di più campi da tennis nella città.' },
   ]);
 
   const [inputValue, setInputValue] = useState('');
 
   // Reference to the bottom of the messages list
-  const messagesEndRef = useRef(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Scroll to the bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  useEffect(() => {
-    if (responseMessage) {
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        { role: 'assistant', content: responseMessage },
-      ]);
-    }
-  }, [responseMessage]);
-  
   const handleSendMessage = () => {
     if (inputValue.trim() !== '') {
       setMessages((prevMessages) => [
@@ -39,26 +33,28 @@ const Chat: React.FC<ChatProps> = ({ conversation, responseMessage }) => {
         { role: 'user', content: inputValue },
       ]);
 
-      setMessageStatus(inputValue);
-      conversation([
-        ...messages,
-        { role: 'user', content: inputValue },
-      ]);
+      setTimeout(() => {
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          { role: 'assistant', content: 'This is a placeholder response.' },
+        ]);
+      }, 0); // Timeout duration in milliseconds (10 seconds)
 
-      // Reset the input field
-      setInputValue('');
+      conversation(
+        [
+          ...messages,
+          { role: 'user', content: inputValue },
+        ]
+      )
     }
   };
+  
 
   return (
-    <div
-      className="flex flex-col bg-gray-50/80 rounded-lg shadow-1 dark:bg-gray-dark dark:shadow-card h-full"
-      style={{ maxHeight: '950px' }}
-    >
+    <div className="flex flex-col bg-gray-50/80 rounded-lg shadow-1 dark:bg-gray-dark dark:shadow-card h-full"  style={{ maxHeight: '850px' }}>
       {/* Messages Container */}
-      <div
-        className="overflow-y-auto p-4 h-full"
-        style={{ maxHeight: '950px' }}
+      <div className="overflow-y-auto p-4 h-full" 
+      style={{ maxHeight: '850px' }}
       >
         {messages.map((message, index) => (
           <div
@@ -80,10 +76,9 @@ const Chat: React.FC<ChatProps> = ({ conversation, responseMessage }) => {
             )}
             <div
               className={`rounded-xl p-4 max-w-xl ${
-                message?.content != null &&
-                (message.role === 'user'
+                message.role === 'user'
                   ? 'bg-[rgba(0,161,129,0.5)] text-white'
-                  : 'bg-white text-black')
+                  : 'bg-white text-black'
               }`}
             >
               {message.role === 'assistant' ? (
