@@ -71,13 +71,18 @@ const dataStatsList = [
 ];
 
 
+type DataObject = {
+  // Define the structure of DataObject here
+  [key: string]: any;
+};
+
 const Home: React.FC = () => {
-  const [message, setMessage] = useState({});
+  const [message, setMessage] = useState<DataObject | undefined>(undefined);
   const [response, setResponse] = useState();
   
   const fetchLambda = async (message:any) => {
     try {
-      const LAMBDA_ENDPOINT = "https://4yyb2h8ufb.execute-api.eu-west-3.amazonaws.com/digital_twin";
+      const LAMBDA_ENDPOINT = "https://4yyb2h8ufb.execute-api.eu-west-3.amazonaws.com/digital_twin_";
   
       const res = await fetch(LAMBDA_ENDPOINT, {
         method: "POST",
@@ -124,8 +129,8 @@ const Home: React.FC = () => {
     <div className="overflow-y-auto p-4 h-full space-y-5" 
       style={{ maxHeight: '900px' }}
       >
-      <HeaderUserPersona dataStatsList={message && Object.keys(message).length > 0 ? dataStatsList : null} />
-      <HeaderUserPersona12 data={message} />
+      <HeaderUserPersona dataStatsList={message && Object.keys(message).length > 0 ? dataStatsList : undefined} />
+      {/* <HeaderUserPersona12 data={message} /> */}
       </div>
       </div>
     </div>

@@ -12,7 +12,7 @@ interface DataStat {
 }
 
 interface HeaderUserPersonaProps {
-  dataStatsList: DataStat[];
+  dataStatsList?: DataStat[];
 }
 const HeaderUserPersona: React.FC<HeaderUserPersonaProps> = ({ dataStatsList }) => {
   const isValidData = dataStatsList && Object.keys(dataStatsList).length > 0 && dataStatsList.length > 0;

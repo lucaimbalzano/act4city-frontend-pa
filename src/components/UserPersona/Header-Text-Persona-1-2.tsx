@@ -14,7 +14,7 @@ interface DataObject {
 }
 
 interface HeaderUserPersona12Props {
-  data: DataObject;
+  data?: DataObject;
 }
 
 const HeaderUserPersona12: React.FC<HeaderUserPersona12Props> = ({ data }) => {
@@ -43,7 +43,7 @@ const HeaderUserPersona12: React.FC<HeaderUserPersona12Props> = ({ data }) => {
                   <ul className="mt-4 list-disc pl-5 text-sm text-gray-700 dark:text-gray-300">
                     <li>Age: {data.filters?.eta ?? "Non Specificato"}</li>
                     <li>Gender: {data.filters?.sesso ?? "Non Specificato"}</li>
-                    {data.filters.job && <li>Job: {data.filters?.occupazione ?? "Non Specificato"}</li>}
+                    {data.filters.occupazione && <li>Job: {data.filters?.occupazione ?? "Non Specificato"}</li>}
                   </ul>
                 )}
                 
